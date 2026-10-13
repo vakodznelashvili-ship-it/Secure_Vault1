@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, QG
                              QFrame, QListWidget, QPushButton, QProgressBar, QMessageBox, QListWidgetItem, QInputDialog)
 # მონაცემთა ბაზასთან სამუშაო ბიბლიოთეკის იმპორტი
 import sqlite3
+from verification.init_db import connect
 
 # მთავარი კლასი, რომელიც წარმოადგენს პაროლების მართვის მთლიან გვერდს
 class PasswordPage(QWidget):
@@ -498,12 +499,12 @@ class PasswordPage(QWidget):
                     # ჩაწერილი ტექსტის შენახვა ახალ ცვლადში
                     new_cat = text
                     # კატეგორიების მონაცემთა ბაზასთან კავშირის დამყარება
-                    conn = sqlite3.connect("category.db")
+                    conn = connect()
                     # კურსორის ობიექტის შექმნა ბრძანებების შესასრულებლად
                     cursor = conn.cursor()
                     try:
                         # ახალი კატეგორიის ბაზაში ჩამატება, თუ ის უკვე არ არსებობს
-                        cursor.execute('INSERT OR IGNORE INTO password_category(name) VALUES(?)', (new_cat,))
+                        cursor.execute('INSERT OR IGNORE INTO categories(name) VALUES(?)', (new_cat,))
                         # ცვლილებების საბოლოოდ შენახვა ბაზაში
                         conn.commit()
                         # წარმატებული ოპერაციის დაპრინტვა კონსოლში
@@ -638,14 +639,14 @@ class PasswordPage(QWidget):
         # ვამოწმებთ, დააჭირა თუ არა მომხმარებელმა თანხმობის ღილაკს
         if result == QMessageBox.Yes:
             # მონაცემთა ბაზასთან კავშირის გახსნა
-            conn = sqlite3.connect("category.db")
+            conn = connect()
             # ბრძანებების კურსორის შექმნა
             cursor = conn.cursor()
             try:
                 # კატეგორიის სახელის გასუფთავება ზედმეტი ცარიელი ჰარებისგან
                 clean_name = category_for_delete.strip()
                 # ბაზიდან შესაბამისი სახელით კატეგორიის წაშლის ბრძანების გაშვება
-                cursor.execute('DELETE FROM password_category WHERE name = ?', (clean_name,))
+                cursor.execute('DELETE FROM categories WHERE name = ?', (clean_name,))
                 # ცვლილებების შენახვა მონაცემთა ბაზის ფაილში
                 conn.commit()
                 # კონსოლში წაშლის წარმატებით დასრულების შეტყობინება
@@ -696,11 +697,11 @@ class PasswordPage(QWidget):
 
         try:
             # ბაზის ფაილთან კავშირის დამყარება
-            conn = sqlite3.connect("category.db")
+            conn = connect()
             # ბრძანებების კურსორის შექმნა
             cursor = conn.cursor()
             # კატეგორიების ცხრილიდან ყველა სახელის წაკითხვის ბრძანება
-            cursor.execute('SELECT name FROM password_category')
+            cursor.execute('SELECT name FROM categories')
             # ყველა წაკითხული მწკრივის ერთიან მასივში ამოღება
             rows = cursor.fetchall()
 
